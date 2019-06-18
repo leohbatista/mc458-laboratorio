@@ -7,7 +7,7 @@ int main(int argc, char *argv[]){
 
     // read instance from file
     Instance instance;
-    readInstance(params.inputFile, instance);
+    readInstance(params, instance);
 
     // solve it
     auto started = chrono::high_resolution_clock::now();
@@ -37,7 +37,6 @@ int main(int argc, char *argv[]){
 // read argv params
 void readParams(Params &params, int argc, char *argv[])
 {
-    params.algorithm = "";
     params.inputFile = "";
     params.showGraph = false;
     params.timelimit = 60;
@@ -60,12 +59,6 @@ void readParams(Params &params, int argc, char *argv[])
             continue;
         }
 
-        if(arg.find("-a") == 0 && next.size() > 0){
-            params.algorithm = next;
-            i++;
-            continue;
-        }
-
         if(arg.find("-g") == 0){
             params.showGraph = true;
             continue;
@@ -73,6 +66,7 @@ void readParams(Params &params, int argc, char *argv[])
 
         if(arg.find("-t") == 0){
             params.timelimit = stoi(next);
+            i++;
             continue;
         }
         
@@ -81,16 +75,16 @@ void readParams(Params &params, int argc, char *argv[])
     }
 
     // Check
-    if(params.inputFile == "" || params.algorithm == ""){
-        cerr << "Input file and algorithm should be specified" << endl;
+    if(params.inputFile == ""){
+        cerr << "Input file should be specified" << endl;
         exit(1);
     }
 }
 
 // read file and get the corresponding instance
-void readInstance(string filename, Instance &instance){
-	instance.instanceName = filename;
-	ifstream file(filename);
+void readInstance(Params &params, Instance &instance){
+	instance.instanceName = params.inputFile;
+	ifstream file(params.inputFile);
 	
 	if (file.is_open()) {
 		string line;
@@ -98,6 +92,9 @@ void readInstance(string filename, Instance &instance){
 		
 		while (getline(file, line)) {
 			if(i == 0){
+				params.algorithm = line;
+			}
+			else if(i == 1){
 				instance.n = stoi(line);
 			}
 			else{

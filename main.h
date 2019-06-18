@@ -21,7 +21,7 @@ struct Params{
 };
 
 void readParams(Params &params, int argc, char *argv[]);
-void readInstance(string filename, Instance &instance);
+void readInstance(Params &params, Instance &instance);
 void printSolution(Instance &instance, vector<int> &solution);
 void createPDF(Instance &instance, vector<int> &solution);
 #endif // MAIN_H
