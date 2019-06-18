@@ -9,6 +9,7 @@
 #include <bits/stdc++.h> 
 #include <algorithm>
 #include <chrono>
+#include <limits>
 
 #define M 32
 
@@ -18,6 +19,6 @@ double getDistance(Point p1, Point p2);
 double memorizedDistance(double ** store, Instance &instance, int i, int j);
 vector<int> solveBottomUp(Instance &instance, int timelimit, chrono::high_resolution_clock::time_point &started);
 
-void recursiveTopDown(double ** store, Instance &instance, int size, vector<int> res, bool * used);
+void recursiveTopDown(double ** store, Instance &instance, int size, vector<int> permutation, bool * used_flags, double * min_distance, vector<int> &solution);
 vector<int> solveTopDown(Instance &instance, int timelimit, chrono::high_resolution_clock::time_point &started);
 #endif // SOLVER_H
