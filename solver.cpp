@@ -7,10 +7,21 @@ double getDistance(Point p1, Point p2){
 	return sqrt(delta_x * delta_x + delta_y * delta_y); 
 }
 
+double memorizedDistance(double ** store, Instance &instance, int i, int j) {
+	if(store[i][j] != INFINITY) {
+		return store[i][j];
+	} else if(store[j][i] != INFINITY) {
+		return store[j][i];
+	} else {
+		double distance = getDistance(instance.points[i], instance.points[j]);
+		store[i][j] = distance;
+		store[j][i] = distance;
+		return distance;
+	}
+}
+
 vector<int> solveBottomUp(Instance &instance, int timelimit, chrono::high_resolution_clock::time_point &started){
 	vector<int> sol;
-	
-	vector<double><double> store; 
 	
 	for(int i = 1; i < instance.n - 1; i++){
 		sol.push_back(i);
@@ -27,17 +38,51 @@ vector<int> solveBottomUp(Instance &instance, int timelimit, chrono::high_resolu
 	return sol;
 }
 
+
+
+void recursiveTopDown(double ** store, Instance &instance, int size, vector<int> res, bool * used) {
+	// cout << "(" << size << "," << instance.n-1 <<") Used: ";
+	// for (int i = 0; i < instance.n; i++){
+	// 	cout << used[i] << " ";
+	// }
+	// cout << endl;
+
+	if(size == instance.n) {
+		cout << "Sequence: ";
+		for (int i = 0; i < instance.n; i++){
+			cout << res[i] << " ";
+		}
+		cout << endl;
+	} else if(size < instance.n) { 
+		for (int i = 0; i < instance.n; i++) {
+			if(used[i]) {
+				// cout << " break " << endl;
+				continue;
+			} else {
+				used[i] = true;
+				res.push_back(i);
+				recursiveTopDown(store, instance, size+1, res, used);
+				res.pop_back();
+				used[i] = false;
+			}
+		}
+	}
+}
+
 vector<int> solveTopDown(Instance &instance, int timelimit, chrono::high_resolution_clock::time_point &started){
 	vector<int> sol;
-	int vector_solution = INFINITY;
 	
 	// Creates memorization table
 	double ** store = (double **) malloc(instance.n * sizeof(double *));
 	for (int i = 0; i < instance.n; i++) {
 		store[i] = (double *) malloc(instance.n * sizeof(double));
 	}
+	
+	bool * used = (bool *) malloc(instance.n * sizeof(bool));
 
 	for (int i = 0; i < instance.n; i++) {
+		used[i] = false;
+
 		for (int j = 0; j < instance.n; j++) {
 			if(i == j) {
 				store[i][j] = 0;
@@ -46,37 +91,10 @@ vector<int> solveTopDown(Instance &instance, int timelimit, chrono::high_resolut
 			}
 		}
 	}
+	
+	vector<int> res;
 
-	int solution_distance = INFINITY; 
-
-	for (int i = 0; i < instance.n; i++) {
-		
-		double distance;
-		for (int j = 0; i < instance.n; i++) {
-			if(i == j) {
-				break;
-			}
-			
-			if(store[i][j] != INFINITY) {
-				distance = store[i][j];
-			} else if(store[j][i] != INFINITY) {
-				distance = store[j][i];
-			} else {
-				distance = getDistance(instance.points[i], instance.points[j]);
-				store[i][j] = distance;
-				store[j][i] = distance;
-			}	
-		}
-		
-	}
+	recursiveTopDown(store,instance,0,res,used);
 
 	return sol;
-}
-
-int recursiveTopDown(double ** store, vector<int> instance, int start, int end) {
-	if(start == end) {
-		return 0;
-	} else {
-		
-	}
 }
