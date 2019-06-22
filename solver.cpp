@@ -24,8 +24,8 @@ double getMemorizedDistance(double ** store, Instance &instance, int i, int j) {
 }
 
 vector<int> solveBottomUp(Instance &instance, int timelimit, chrono::high_resolution_clock::time_point &started){
-	vector<int> temp_sol;
-	temp_sol.push_back(0);
+	vector<int> solution;
+	solution.push_back(0);
 	
 	double ** store_dist = (double **) malloc(instance.n * sizeof(double *));
 	int ** store_sol = (int **) malloc(instance.n * sizeof(int *));
@@ -54,31 +54,34 @@ vector<int> solveBottomUp(Instance &instance, int timelimit, chrono::high_resolu
 
 
 	double dist = getMemorizedDistance(store_dist, instance, 0, instance.n - 1);
-	temp_sol.push_back(instance.n - 1);
+	solution.push_back(instance.n - 1);
 	for(int i = 1; i < instance.n - 1; i++){
 		//sol.push_back(i);
 
 		double temp_dist, min_dist = infinity_const;
 		int pos = 1;
-		for(int j = 0; j < i; j++) {
-			temp_dist = dist - getMemorizedDistance(store_dist, instance, temp_sol[j], temp_sol[j+1]) 
-			+ getMemorizedDistance(store_dist, instance, temp_sol[j], i)
-			+ getMemorizedDistance(store_dist, instance, i, temp_sol[j+1]);
+		for(int j = 0; j < i; j++) { 
+			temp_dist = dist - getMemorizedDistance(store_dist, instance, solution[j], solution[j+1]) 
+			+ getMemorizedDistance(store_dist, instance, solution[j], i)
+			+ getMemorizedDistance(store_dist, instance, i, solution[j+1]);
+
+			cout << "i:" << i << "  j:" << j << "  pos:" << pos << endl;
+			cout << "temp:" << temp_dist << "  min:" << min_dist << endl;
 			if(temp_dist < min_dist) {
 				min_dist = temp_dist;
 				pos = j+1;
 			}
 		}
 
-		temp_sol.insert( temp_sol.begin() + pos, i );
+		solution.insert( solution.begin() + pos, i );
 		dist = min_dist;
 
-		// cout << i << ")   ";
-		// for (int k = 0; k < temp_sol.size(); k++) {
-		// 	cout << temp_sol[k] << " ";
-		// }
-		// cout << dist;
-		// cout << endl << endl;
+		cout << i << ")   ";
+		for (int k = 0; k < solution.size(); k++) {
+			cout << solution[k] << " ";
+		}
+		cout << dist;
+		cout << endl << endl;
 
 		// get the time that has passed in seconds and check the timelimit
 		auto done = chrono::high_resolution_clock::now();
@@ -89,7 +92,13 @@ vector<int> solveBottomUp(Instance &instance, int timelimit, chrono::high_resolu
 		}
 	}
 
-	vector<int> sol (temp_sol.begin() + 1, temp_sol.end() - 1);
+	solution.pop_back();
+	solution.erase(solution.begin());
+
+	for (int i = 0; i < solution.size(); i++) {
+ 		cout << solution[i] << " ";
+	}
+	cout << endl << endl;
 
 	// for (int i = 0; i < instance.n; i++) {
 	// 	for (int j = 0; j < instance.n; j++) {
@@ -98,7 +107,7 @@ vector<int> solveBottomUp(Instance &instance, int timelimit, chrono::high_resolu
 	// 	cout << endl << endl;
 	// }
 	
-	return sol;
+	return solution;
 }
 
 // ---------------------------------------------------------------------------------
@@ -159,13 +168,21 @@ vector<int> solveTopDown(Instance &instance, int timelimit, chrono::high_resolut
 	}
 	
 	// Initialization of recursion parameters
-	vector<int> permutation;
-	vector<int> solution;
+	std::vector<int> permutation;
+	std::vector<int> solution;
 	permutation.push_back(0);
 	double min_distance = infinity_const;
 
 	// Recursive resolution
 	recursiveTopDown(instance, instance.n-1, permutation, store, used, &min_distance, solution);
+
+	solution.pop_back();
+	solution.erase(solution.begin());
+	
+	for (int i = 0; i < solution.size(); i++) {
+ 		cout << solution[i] << " ";
+	 }
+	cout << endl << endl;
 
 	return solution;
 }
