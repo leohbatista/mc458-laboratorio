@@ -19,7 +19,7 @@ double getDistance(Point p1, Point p2);
 double memorizedDistance(double ** store, Instance &instance, int i, int j);
 vector<int> solveBottomUp(Instance &instance, int timelimit, chrono::high_resolution_clock::time_point &started);
 
-void recursiveTopDown(Instance &instance, int size, vector<int> permutation, double ** store, bool * used_flags, double * min_distance, vector<int> &solution);
+void recursiveTopDown(Instance &instance, int size, vector<int> permutation, double ** store, bool * used_flags, double * min_distance, vector<int> &solution, chrono::high_resolution_clock::time_point &started);
 vector<int> solveTopDown(Instance &instance, int timelimit, chrono::high_resolution_clock::time_point &started);
 
 #endif // SOLVER_H

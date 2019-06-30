@@ -23,21 +23,22 @@ double getMemorizedDistance(double ** store, Instance &instance, int i, int j) {
 	}
 }
 
+// ---------------------------------------------------------------------------------
+// Bottom-Up Solution:
+
 vector<int> solveBottomUp(Instance &instance, int timelimit, chrono::high_resolution_clock::time_point &started){
-	vector<int> temp_sol;
-	temp_sol.push_back(0);
+	vector<int> temp_solution;
+	temp_solution.push_back(0);
 	
+	// Creates and initializates memorization table
 	double ** store_dist = (double **) malloc(instance.n * sizeof(double *));
-	int ** store_sol = (int **) malloc(instance.n * sizeof(int *));
 	for (int i = 0; i < instance.n; i++) {
 		store_dist[i] = (double *) malloc(instance.n * sizeof(double));
-		store_sol[i] = (int *) malloc(instance.n * sizeof(int));
 	}
 	for (int i = 0; i < instance.n; i++) {
 		for (int j = i; j < instance.n; j++) {
 			if(i == j) {
 				store_dist[i][j] = 0.0;
-				store_sol[i][j] = 0;
 			} else {
 				store_dist[i][j] = infinity_const;
 				store_dist[j][i] = infinity_const;
@@ -45,66 +46,59 @@ vector<int> solveBottomUp(Instance &instance, int timelimit, chrono::high_resolu
 		}
 	}
 
-	// for (int i = 0; i < instance.n; i++) {
-	// 	for (int j = 0; j < instance.n; j++) {
-	// 		cout << store_dist[i][j] << " ";
-	// 	}
-	// 	cout << endl << endl;
-	// }
-
-
+	// Calculates base distance from start to end
 	double dist = getMemorizedDistance(store_dist, instance, 0, instance.n - 1);
-	temp_sol.push_back(instance.n - 1);
-	for(int i = 1; i < instance.n - 1; i++){
-		//sol.push_back(i);
+	temp_solution.push_back(instance.n - 1);
 
+	// Iterates over each point of instance, excluding start and end
+	for(int i = 1; i < instance.n - 1; i++) {
 		double temp_dist, min_dist = infinity_const;
-		int pos = 1;
+		
+		int position = 1;
+
+		// For the current point, check which position we insert the current point will generate the minimum local path 
 		for(int j = 0; j < i; j++) {
-			temp_dist = dist - getMemorizedDistance(store_dist, instance, temp_sol[j], temp_sol[j+1]) 
-			+ getMemorizedDistance(store_dist, instance, temp_sol[j], i)
-			+ getMemorizedDistance(store_dist, instance, i, temp_sol[j+1]);
+			// Calculates the current distance
+			temp_dist = dist - getMemorizedDistance(store_dist, instance, temp_solution[j], temp_solution[j+1]) 
+			+ getMemorizedDistance(store_dist, instance, temp_solution[j], i)
+			+ getMemorizedDistance(store_dist, instance, i, temp_solution[j+1]);
+			
+			// Check if current solution is the minimum
 			if(temp_dist < min_dist) {
 				min_dist = temp_dist;
-				pos = j+1;
+				position = j+1;
 			}
 		}
 
-		temp_sol.insert( temp_sol.begin() + pos, i );
+		// Insert the current point on the optimal position
+		temp_solution.insert( temp_solution.begin() + position, i );
 		dist = min_dist;
 
-		// cout << i << ")   ";
-		// for (int k = 0; k < temp_sol.size(); k++) {
-		// 	cout << temp_sol[k] << " ";
-		// }
-		// cout << dist;
-		// cout << endl << endl;
-
-		// get the time that has passed in seconds and check the timelimit
+		// Get the time that has passed in seconds and check the timelimit
 		auto done = chrono::high_resolution_clock::now();
 		auto time = chrono::duration_cast<chrono::seconds>(done-started).count();
-		
 		if(time > timelimit){
 			break;
 		}
 	}
 
-	vector<int> sol (temp_sol.begin() + 1, temp_sol.end() - 1);
+	// Removes start and end from the temporary solution
+	vector<int> solution (temp_solution.begin() + 1, temp_solution.end() - 1);
 
-	// for (int i = 0; i < instance.n; i++) {
-	// 	for (int j = 0; j < instance.n; j++) {
-	// 		cout << store_dist[i][j] << " ";
-	// 	}
-	// 	cout << endl << endl;
-	// }
-	
-	return sol;
+	return solution;
 }
 
 // ---------------------------------------------------------------------------------
 // Top-Down Solution:
 
-void recursiveTopDown(Instance &instance, int size, vector<int> permutation, double ** store, bool * used_flags, double * min_distance, vector<int> &solution) {
+void recursiveTopDown(Instance &instance, int size, vector<int> permutation, double ** store, bool * used_flags, double * min_distance, vector<int> &solution, int timelimit, chrono::high_resolution_clock::time_point &started) {
+	// Get the time that has passed in seconds and check the timelimit
+	auto done = chrono::high_resolution_clock::now();
+	auto time = chrono::duration_cast<chrono::seconds>(done-started).count();
+	if(time > timelimit){
+		return;
+	}
+
 	if(size == 1) {
 		// Adds the end point to the permutation
 		permutation.push_back(instance.n - 1);
@@ -132,7 +126,7 @@ void recursiveTopDown(Instance &instance, int size, vector<int> permutation, dou
 				// If the point is not already on permutation, add it to permutation and call recursive function
 				used_flags[i] = true;
 				permutation.push_back(i);
-				recursiveTopDown(instance, size - 1, permutation, store, used_flags, min_distance, solution);
+				recursiveTopDown(instance, size - 1, permutation, store, used_flags, min_distance, solution, timelimit, started);
 				permutation.pop_back();
 				used_flags[i] = false;
 			}
@@ -167,7 +161,7 @@ vector<int> solveTopDown(Instance &instance, int timelimit, chrono::high_resolut
 	permutation.push_back(0);
 
 	// Recursive resolution
-	recursiveTopDown(instance, instance.n-1, permutation, store, used, &min_distance, solution);
+	recursiveTopDown(instance, instance.n-1, permutation, store, used, &min_distance, solution, timelimit, started);
 
 	// Removes start and end points of final solution
 	solution.pop_back();
